@@ -1,14 +1,26 @@
 import { Configuration, OpenAIApi } from 'openai';
+import TelegramBot, { Message } from 'node-telegram-bot-api';
 
 import { FastifyPluginAsync } from 'fastify';
-import TelegramBot from 'node-telegram-bot-api';
 import fs from 'fs';
 import schedule from 'node-schedule'
-import { writeTextToFile } from 'helpers/writeToFile';
 
+const asyncFs = fs.promises
 const token = process.env.TELEGRAM_API_KEY || ''
 const bot = new TelegramBot(token, { polling: true })
 
+
+const writeTextToFile = async (msg: Message) => {
+  const firstName = msg.from?.first_name
+  const text = msg.text
+  const entry = `${firstName}: ${text}\n`
+  try {
+    await asyncFs.appendFile('convo.txt', entry)
+  } catch (_) {
+    throw new Error('error appending entry to file')
+  }
+
+}
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_KEY,
@@ -27,7 +39,7 @@ bot.on('message', async (msg, match) => {
   }
   await writeTextToFile(msg)
 });
-schedule.scheduleJob('0 22 * * *', async function () {
+schedule.scheduleJob('0 19 * * *', async function () {
   const prompt = fs.readFileSync('convo.txt', 'utf-8')
   try {
     const completion = await openai.createCompletion({
