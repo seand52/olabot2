@@ -1,5 +1,5 @@
-import fastify from 'fastify';
 import config from './plugins/config.js';
+import fastify from 'fastify';
 import routes from './routes/index.js';
 
 const server = fastify({

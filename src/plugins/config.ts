@@ -1,8 +1,10 @@
 import "dotenv/config";
-import fp from "fastify-plugin";
-import { FastifyPluginAsync } from "fastify";
+
 import { Static, Type } from "@sinclair/typebox";
+
 import Ajv from "ajv";
+import { FastifyPluginAsync } from "fastify";
+import fp from "fastify-plugin";
 
 export enum NodeEnv {
   development = "development",
@@ -16,6 +18,7 @@ const ConfigSchema = Type.Strict(
     LOG_LEVEL: Type.String(),
     API_HOST: Type.String(),
     API_PORT: Type.String(),
+    TELEGRAM_API_KEY: Type.String()
   })
 );
 
