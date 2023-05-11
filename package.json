@@ -36,14 +36,14 @@
   "dependencies": {
     "@sinclair/typebox": "^0.23.5",
     "ajv": "^8.11.2",
+    "chatgpt": "^5.2.4",
     "dotenv": "^16.0.3",
     "env-schema": "^5.1.1",
     "fastify": "^4.10.2",
     "fastify-plugin": "^3.0.1",
     "node-fetch": "^3.3.1",
     "node-schedule": "^2.1.1",
-    "node-telegram-bot-api": "^0.61.0",
-    "openai": "^3.2.1"
+    "node-telegram-bot-api": "^0.61.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.15",

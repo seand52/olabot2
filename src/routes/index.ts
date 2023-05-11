@@ -1,6 +1,6 @@
-import { Configuration, OpenAIApi } from 'openai';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 
+import { ChatGPTAPI } from 'chatgpt'
 import { FastifyPluginAsync } from 'fastify';
 import fs from 'fs';
 import schedule from 'node-schedule'
@@ -22,16 +22,17 @@ const writeTextToFile = async (msg: Message) => {
 
 }
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
-const intro = `Te voy a enviar una serie de mensajes en este formato
+const api = new ChatGPTAPI({
+  apiKey: process.env.OPENAI_KEY || '',
+})
+
+
+const intro = `Te voy a enviar una serie de mensajes en el siguiente formato:
 Nombre: mensaje
-
-Quiero que me hagas un resumen de todos los mensajes que he enviado. El resumen tiene que tener un maximo de 500 palabras. Gracias. Gracias.
-`
+Nombre: mensaje
+Nombre: mensaje
+Quiero que me hagas un resumen de todos los mensajes que he enviado con un tono gracioso. El resumen tiene que tener un maximo de 500 palabras. Quiero que vayas directo al resumen. Gracias`
 bot.on('message', async (msg, match) => {
   console.log({ msg, match })
   if (match.type !== 'text') {
@@ -39,19 +40,18 @@ bot.on('message', async (msg, match) => {
   }
   await writeTextToFile(msg)
 });
+
 schedule.scheduleJob('0 19 * * *', async function () {
   const prompt = fs.readFileSync('convo.txt', 'utf-8')
-  try {
-    const completion = await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt: `${intro}\n${prompt}`,
-      max_tokens: 1000
-    })
-    console.log({ completion: completion.data.choices[0].text })
-  } catch (e) {
-    console.log(e)
-  }
-  clearFile()
+    try {
+      const result = await api.sendMessage(`${intro}\n${prompt}`)
+      console.log(result)
+      await bot.sendMessage(-1001987388711, `ola! aqui dejo el resumen de las mierdas que habeis dicho hoy, ${process.env.SECRET_TEXT}`)
+      await bot.sendMessage(-1001987388711, result.text || '')
+    } catch (e) {
+      console.log(e)
+    }
+    clearFile()
 })
 const clearFile = () => {
   fs.writeFile('convo.txt', '', (err) => {
@@ -65,12 +65,10 @@ const routes: FastifyPluginAsync = async (server) => {
   server.get('/', async function (_, res) {
     const prompt = fs.readFileSync('convo.txt', 'utf-8')
     try {
-      const completion = await openai.createCompletion({
-        model: 'text-davinci-003',
-        prompt: `${intro}\n${prompt}`,
-        max_tokens: 1000
-      })
-      console.log({ completion: completion.data.choices[0].text })
+      const result = await api.sendMessage(`${intro}\n${prompt}`)
+      console.log(result)
+      await bot.sendMessage(-1001987388711, `ola! aqui dejo el resumen de las mierdas que habeis dicho hoy, ${process.env.SECRET_TEXT}`)
+      await bot.sendMessage(-1001987388711, result.text || '')
     } catch (e) {
       console.log(e)
     }
